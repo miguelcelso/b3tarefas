@@ -1,0 +1,67 @@
+version: "3.8"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"  # Porta para comunicação com a fila
+      - "15672:15672"  # Porta para a interface web do RabbitMQ (gerenciamento)
+    environment:
+      RABBITMQ_DEFAULT_USER: xavier
+      RABBITMQ_DEFAULT_PASS: xavier
+    volumes:
+      - ./data:/var/lib/rabbitmq  # Mapeamento para persistência de dados
+    networks:
+      - tarefas-network
+
+  sqlserver_demo:
+    container_name: sqlserver_demo
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      SA_PASSWORD: "x@2024ServE#"  # Defina sua senha aqui
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    ports:
+      - "1445:1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql  # Mapeamento para persistência de dados
+    
+  tarefasweb:
+    container_name: tarefasweb
+    environment:
+      SA_PASSWORD: "x@2024ServE#"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      DB_CONNECTION_STRING: "Server=sqlserver_demo;Database=workteste;User=sa;Password=x@2024ServE#"
+    build:
+      context: .
+      dockerfile: TarefasWeb/Dockerfile
+    depends_on:
+      - sqlserver_demo
+      - rabbitmq
+    ports:
+      - "8081:8080"
+    networks:
+      - tarefas-network
+
+  workweb:
+    container_name: worksweb
+    environment:
+      SA_PASSWORD: "x@2024ServE#"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    depends_on:
+      - sqlserver_demo
+      - rabbitmq
+    networks:
+      - tarefas-network
+
+networks:
+  tarefas-network:
+    driver: bridge
+    
+volumes:
+  sqlserverdata:
