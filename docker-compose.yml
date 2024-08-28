@@ -44,10 +44,22 @@ services:
     networks:
       - tarefas-network
 
+  fronttarefa:
+    image: fronttarefa
+    build:
+      context: .
+      dockerfile: .fronttarefa/Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 4200:4200
+    networks:
+      - tarefas-network
+
   workweb:
     container_name: worksweb
     environment:
-      SA_PASSWORD: "x@2024ServE#"
+      MSSQL_SA_PASSWORD: "x@2024ServE#"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
     build:
@@ -56,8 +68,6 @@ services:
     depends_on:
       - sqlserver_demo
       - rabbitmq
-    networks:
-      - tarefas-network
 
 networks:
   tarefas-network:

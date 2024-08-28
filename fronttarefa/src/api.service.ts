@@ -8,7 +8,7 @@ import TarefaCreate from './models/tarefas/tarefa-create';
   providedIn: 'root'
 })
 export class ApiService {
-  private SERVER_URL = "https://localhost:7190/Tarefa";
+  private SERVER_URL = "https://localhost:8081/Tarefa";
 
  constructor(private httpClient: HttpClient) { }
 
